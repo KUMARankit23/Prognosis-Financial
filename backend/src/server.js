@@ -34,13 +34,11 @@ app.use(helmet({
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',').map(o => o.trim());
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, server-to-server)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
       callback(null, true);
     } else {
       callback(new Error(`CORS: Origin ${origin} not allowed.`));
-    }
     }
   },
   credentials: true,
