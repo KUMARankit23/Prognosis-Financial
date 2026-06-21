@@ -154,28 +154,56 @@ START → "Call me back" | "Schedule a meeting" trigger
 
 ---
 
-## CIP Evaluation Evidence
+## Canvas Screenshots
 
-### Prototype Evidence
-- Voiceflow conversation flows designed for all 8 modules
-- Decision trees validated before React implementation
-- User interaction paths tested in Voiceflow canvas
+> **Instructions for CIP Submission:**
+> Place the following screenshots in `voiceflow-evidence/screenshots/` before submission.
+> See `voiceflow-evidence/VOICEFLOW_CANVAS_GUIDE.md` for exact capture instructions.
 
-### Deployment Evidence
-- Frontend: https://prognosis-financial-eight.vercel.app
-- Backend: https://prognosis-financial.onrender.com
-- Database: MongoDB Atlas (ankitorg cluster)
-- GitHub: https://github.com/KUMARankit23/Prognosis-Financial
-
-### Testing Evidence
-- See TESTING_EVIDENCE.md — 15 test cases, all passing
-- Covers all 8 Voiceflow flows
-
-### User Interaction Evidence
-- Live chatbot at deployed URL
-- Captures leads, creates tickets, tracks follow-ups
+| Screenshot File | Contents |
+|----------------|----------|
+| `VF-01-canvas-overview.png` | All 8 flows visible in Voiceflow project dashboard |
+| `VF-02-sip-flow.png` | SIP Information Flow canvas nodes |
+| `VF-03-mutual-fund-flow.png` | Mutual Fund Flow + escalation branch |
+| `VF-04-demat-flow.png` | Demat Flow with documents sub-menu |
+| `VF-05-insurance-flow.png` | Insurance Flow with Health/Term split |
+| `VF-06-goal-planning-flow.png` | Goal Planning Flow — 5 branches |
+| `VF-07-lead-capture-flow.png` | Lead Capture 2-step form nodes |
+| `VF-08-escalation-flow.png` | Advisor Escalation ticket creation node |
+| `VF-09-followup-flow.png` | Follow-Up Request flow |
+| `VF-10-test-conversation.png` | Voiceflow test panel — live conversation |
 
 ---
 
-*Voiceflow prototype link: Available upon request from project supervisor*
-*Note: Voiceflow was used for design and prototyping. Final implementation is in React + Node.js as specified.*
+## Published Voiceflow Link
+
+**Link:** `[ADD YOUR VOICEFLOW PUBLISHED PROTOTYPE LINK HERE BEFORE SUBMISSION]`
+
+To generate:
+1. Open the Voiceflow project
+2. Click Publish (top right) → Enable "Share via link"
+3. Copy URL (format: `https://creator.voiceflow.com/prototype/XXXX`)
+4. Replace the placeholder above with your actual link
+
+---
+
+## Voiceflow Test Conversations
+
+See `voiceflow-evidence/VOICEFLOW_TEST_CONVERSATIONS.md` for 10 full test conversations
+covering all 8 flows, including escalation, lead capture, follow-up, and security validation.
+
+---
+
+## Voiceflow Evidence Package
+
+See `voiceflow-evidence/` folder for the complete evidence bundle:
+- `VOICEFLOW_EVIDENCE_PACKAGE.md` — Index and overview
+- `VOICEFLOW_FLOW_DIAGRAMS.md` — Detailed ASCII flow diagrams for all 8 flows
+- `VOICEFLOW_TEST_CONVERSATIONS.md` — 10 test conversation transcripts
+- `VOICEFLOW_CANVAS_GUIDE.md` — Screenshot instructions and naming convention
+- `VOICEFLOW_IMPLEMENTATION_MAPPING.md` — Node-level design-to-code traceability matrix
+
+---
+
+*Note: Voiceflow was used for design and prototyping. Final implementation is in React + Node.js.*
+*Canvas screenshots and published link to be added to `voiceflow-evidence/screenshots/` before CIP submission.*

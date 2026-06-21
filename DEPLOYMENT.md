@@ -60,6 +60,10 @@ RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
 ```
 
+> **AI Provider:** This project uses Google Gemini (free tier).
+> Get your key at: https://aistudio.google.com/app/apikey
+> Do NOT add OPENAI_API_KEY — it is not used.
+
 5. Click **Deploy** → Wait 2-3 minutes
 6. Copy your backend URL: `https://prognosis-financial-backend.onrender.com`
 

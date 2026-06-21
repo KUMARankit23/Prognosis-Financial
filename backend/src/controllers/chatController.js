@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Message = require('../models/Message');
 const Lead = require('../models/Lead');
 const AdvisorTicket = require('../models/AdvisorTicket');
+const FollowUp = require('../models/FollowUp');
 const { classifyIntent, scorePriority } = require('../services/intentClassifier');
 const { generateResponse } = require('../services/geminiService');
 const { sanitizeMessage } = require('../utils/sanitizer');
@@ -84,6 +85,36 @@ const sendMessage = async (req, res) => {
       logger.info(`Advisor ticket created: ${ticketId} for session: ${sid}`);
     }
 
+    // BUG-03 fix: Create FollowUp record when follow_up_query intent is detected.
+    // TC-11 ("Call me back please") now correctly creates a pending follow-up in the database.
+    let followUpRecord = null;
+    if (intent === 'follow_up_query') {
+      const lead = await Lead.findOne({ sessionId: sid });
+      const followUpData = {
+        sessionId: sid,
+        userName: user.name || 'Anonymous',
+        userPhone: user.phone || '',
+        userEmail: user.email || '',
+        reason: cleanMessage,
+        channel: 'call',
+        status: 'pending',
+      };
+      // Attach leadId only when a lead exists (makes leadId optional safe)
+      if (lead?._id) followUpData.leadId = lead._id;
+
+      followUpRecord = await FollowUp.create(followUpData);
+
+      // Sync lead follow-up tracking
+      if (lead) {
+        await Lead.findByIdAndUpdate(lead._id, {
+          followUpStatus: 'pending',
+          $inc: { followUpCount: 1 },
+        });
+      }
+
+      logger.info(`Follow-up record created from chat: ${followUpRecord._id} for session: ${sid}`);
+    }
+
     // Update lead priority if lead exists
     if (user.leadCaptured) {
       const leadPriorityScore = scorePriority(cleanMessage);
@@ -103,6 +134,7 @@ const sendMessage = async (req, res) => {
         intent,
         escalated: escalate,
         ticket: ticket ? { ticketId: ticket.ticketId, status: ticket.status } : null,
+        followUp: followUpRecord ? { followUpId: followUpRecord._id, status: followUpRecord.status } : null,
       },
     });
   } catch (error) {

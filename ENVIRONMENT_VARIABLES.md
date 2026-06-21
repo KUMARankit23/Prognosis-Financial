@@ -7,8 +7,8 @@
 | `PORT` | No | Server port | `5000` |
 | `NODE_ENV` | Yes | Environment | `development` or `production` |
 | `MONGODB_URI` | Yes | MongoDB Atlas connection string | `mongodb+srv://user:pass@cluster.net/db` |
-| `OPENAI_API_KEY` | Yes | OpenAI secret key | `sk-...` |
-| `OPENAI_MODEL` | No | GPT model to use | `gpt-4o-mini` (default) |
+| `GEMINI_API_KEY` | Yes | Google Gemini API key | Get free key at aistudio.google.com |
+| `GEMINI_MODEL` | No | Gemini model to use | `gemini-2.5-flash-lite-preview-06-17` (default) |
 | `JWT_SECRET` | Yes | Secret for JWT signing | Long random string |
 | `JWT_EXPIRES_IN` | No | Token expiry | `7d` |
 | `ADMIN_EMAIL` | Yes | Admin account email | `admin@prognosisfinancial.com` |
@@ -23,6 +23,15 @@
 |----------|----------|-------------|---------|
 | `VITE_API_URL` | Yes | Backend API base URL | `https://your-backend.onrender.com/api` |
 | `VITE_APP_NAME` | No | App display name | `Prognosis Financial` |
+
+## AI Provider Note
+This project uses **Google Gemini** (not OpenAI).
+- Service file: `backend/src/services/geminiService.js`
+- Free tier: 1000 requests/day via Google AI Studio
+- Get API key: https://aistudio.google.com/app/apikey
+
+> Note: `backend/src/services/openaiService.js` is a legacy file retained for reference only.
+> It is NOT imported or used anywhere in the active codebase.
 
 ## Notes
 - Never commit `.env` files to version control

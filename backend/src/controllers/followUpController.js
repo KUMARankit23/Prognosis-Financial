@@ -4,6 +4,8 @@ const logger = require('../utils/logger');
 
 /**
  * POST /api/followups — Create follow-up request
+ * BUG-02 fix: leadId is now optional — anonymous users without a lead can still request follow-ups.
+ * The controller resolves lead data from leadId or sessionId when available, but does not require it.
  */
 const createFollowUp = async (req, res) => {
   try {
@@ -12,16 +14,23 @@ const createFollowUp = async (req, res) => {
       return res.status(400).json({ success: false, message: 'leadId or sessionId required.' });
     }
 
+    // Attempt to find an associated lead — gracefully handles null (anonymous users)
     let lead = null;
-    if (leadId) {
-      lead = await Lead.findById(leadId);
-    } else if (sessionId) {
-      lead = await Lead.findOne({ sessionId });
+    try {
+      if (leadId) {
+        lead = await Lead.findById(leadId);
+      } else if (sessionId) {
+        lead = await Lead.findOne({ sessionId });
+      }
+    } catch (lookupErr) {
+      // Non-fatal — proceed without a lead reference
+      logger.warn(`FollowUp lead lookup failed: ${lookupErr.message}`);
     }
 
     const followUp = await FollowUp.create({
-      leadId: lead?._id,
-      sessionId: sessionId || lead?.sessionId,
+      // BUG-02 fix: leadId is optional — omit field entirely if lead not found
+      ...(lead?._id ? { leadId: lead._id } : {}),
+      sessionId: sessionId || lead?.sessionId || 'unknown',
       userName: lead?.name || 'Anonymous',
       userPhone: lead?.phone || '',
       userEmail: lead?.email || '',
@@ -31,7 +40,7 @@ const createFollowUp = async (req, res) => {
       status: scheduledAt ? 'scheduled' : 'pending',
     });
 
-    // Update lead follow-up tracking
+    // Update lead follow-up tracking only when a lead is linked
     if (lead) {
       lead.followUpStatus = followUp.status;
       lead.followUpCount = (lead.followUpCount || 0) + 1;

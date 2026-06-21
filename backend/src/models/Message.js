@@ -26,6 +26,7 @@ const messageSchema = new mongoose.Schema(
         'insurance_query',
         'goal_planning_query',
         'wealth_creation_query',
+        'follow_up_query',       // BUG-01 fix: added so intentClassifier follow_up_query saves correctly
         'general_query',
         'advisor_escalation',
         'lead_capture',

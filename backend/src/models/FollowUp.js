@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const followUpSchema = new mongoose.Schema(
   {
-    leadId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lead', required: true, index: true },
+    // BUG-02 fix: leadId is optional — anonymous users (no lead captured) can still request follow-ups
+    leadId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lead', required: false, index: true },
     sessionId: { type: String, required: true, index: true },
     userName: { type: String, default: 'Anonymous' },
     userPhone: { type: String, default: '' },

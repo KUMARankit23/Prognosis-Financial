@@ -1,3 +1,14 @@
+/**
+ * LEGACY FILE — NOT IN USE
+ * -------------------------
+ * This file was the original OpenAI implementation.
+ * The active AI service is: geminiService.js (Google Gemini API)
+ *
+ * This file is retained for reference only and is NOT imported anywhere in the codebase.
+ * The `openai` npm package in package.json can be safely removed if desired.
+ *
+ * @deprecated Use geminiService.js instead
+ */
 const OpenAI = require('openai');
 const logger = require('../utils/logger');
 const { sanitizeMessage } = require('../utils/sanitizer');

@@ -168,7 +168,8 @@ See [VOICEFLOW_ARCHITECTURE.md](./VOICEFLOW_ARCHITECTURE.md) for full documentat
 cd backend
 npm install
 cp .env.example .env
-# Add GEMINI_API_KEY and MONGODB_URI
+# Edit .env — add your GEMINI_API_KEY and MONGODB_URI
+# Get Gemini API key (free): https://aistudio.google.com/app/apikey
 npm run dev
 ```
 
@@ -177,6 +178,7 @@ npm run dev
 cd frontend
 npm install
 cp .env.example .env
+# Edit .env — set VITE_API_URL=http://localhost:5000/api
 npm run dev
 ```
 
