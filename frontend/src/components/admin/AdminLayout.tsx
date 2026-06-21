@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Ticket, LogOut, TrendingUp, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, Ticket, LogOut, TrendingUp, Menu, Bell } from 'lucide-react';
 
 const navItems = [
   { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/admin/leads', icon: Users, label: 'Leads' },
   { to: '/admin/tickets', icon: Ticket, label: 'Advisor Tickets' },
+  { to: '/admin/followups', icon: Bell, label: 'Follow-Ups' },
 ];
 
 const AdminLayout: React.FC = () => {

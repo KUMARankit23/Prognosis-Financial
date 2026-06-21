@@ -10,7 +10,7 @@ const quickActions = [
   { label: 'Mutual Funds', icon: BarChart2, color: 'from-indigo-500 to-indigo-600', query: 'Explain mutual funds to me' },
   { label: 'Demat Account', icon: PiggyBank, color: 'from-purple-500 to-purple-600', query: 'How do I open a Demat account?' },
   { label: 'Insurance', icon: Shield, color: 'from-green-500 to-green-600', query: 'Explain health and term insurance' },
-  { label: 'Goal Planning', icon: Target, color: 'from-orange-500 to-orange-600', query: 'Help me understand goal-based investing' },
+  { label: 'Goal Planning', icon: Target, color: 'from-orange-500 to-orange-600', goal: true },
   { label: 'Talk to Advisor', icon: UserCheck, color: 'from-gold-500 to-yellow-600', query: 'I want to talk to a financial advisor' },
 ];
 
@@ -25,9 +25,15 @@ const features = [
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleQuickAction = (query: string) => {
-    sessionStorage.setItem('pf_initial_query', query);
-    navigate('/chat');
+  const handleQuickAction = (action: { query?: string; goal?: boolean }) => {
+    if (action.goal) {
+      navigate('/goal-planning');
+      return;
+    }
+    if (action.query) {
+      sessionStorage.setItem('pf_initial_query', action.query);
+      navigate('/chat');
+    }
   };
 
   return (
@@ -82,10 +88,10 @@ const LandingPage: React.FC = () => {
 
         {/* Quick Action Buttons */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-2xl mb-10">
-          {quickActions.map(({ label, icon: Icon, color, query }) => (
+          {quickActions.map(({ label, icon: Icon, color, query, goal }) => (
             <button
               key={label}
-              onClick={() => handleQuickAction(query)}
+              onClick={() => handleQuickAction({ query, goal })}
               className={`group bg-gradient-to-br ${color} p-4 rounded-2xl text-white text-left shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 active:scale-95`}
             >
               <Icon className="w-7 h-7 mb-2 opacity-90" />

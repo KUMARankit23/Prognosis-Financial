@@ -1,112 +1,104 @@
 const Lead = require('../models/Lead');
 const User = require('../models/User');
 const { sanitizeLeadData, validatePhone, validateEmail } = require('../utils/sanitizer');
-const { scorePriority } = require('../services/intentClassifier');
+const { scorePriority, calculateEngagementScore } = require('../services/intentClassifier');
 const logger = require('../utils/logger');
 
 /**
  * POST /api/leads
- * Capture a new lead from chatbot
+ * Capture a new lead — CIP Extended Profile
  */
 const createLead = async (req, res) => {
   try {
-    const { sessionId, name, phone, email, investmentGoal, context } = req.body;
+    const {
+      sessionId, name, phone, email, investmentGoal, context,
+      riskProfile, productInterest, investmentHorizon,
+    } = req.body;
 
-    // Validate required fields
     if (!name || !phone || !email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Name, phone, and email are required.',
-      });
+      return res.status(400).json({ success: false, message: 'Name, phone, and email are required.' });
     }
 
-    // Sanitize inputs
     const sanitized = sanitizeLeadData({ name, phone, email, investmentGoal });
 
-    // Validate phone
     if (!validatePhone(sanitized.phone)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter a valid 10-digit Indian mobile number.',
-      });
+      return res.status(400).json({ success: false, message: 'Enter a valid 10-digit Indian mobile number.' });
     }
-
-    // Validate email
     if (!validateEmail(sanitized.email)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter a valid email address.',
-      });
+      return res.status(400).json({ success: false, message: 'Enter a valid email address.' });
     }
 
-    // Score priority based on investment goal and context
+    // CIP Priority scoring
     const contextText = `${investmentGoal || ''} ${context || ''}`;
     const { priority, priorityReason } = scorePriority(contextText);
 
-    // Override priority for high-value goals
     let finalPriority = priority;
     let finalReason = priorityReason;
+
+    // CIP HIGH priority: retirement, wealth_creation, large investment amounts
     if (['retirement', 'wealth_creation'].includes(sanitized.investmentGoal)) {
       finalPriority = 'high';
-      finalReason = `High-value investment goal: ${sanitized.investmentGoal}`;
+      finalReason = `High-value goal: ${sanitized.investmentGoal}`;
     }
 
-    // Check for duplicate (same phone or email)
+    // Check duplicate
     const existing = await Lead.findOne({
       $or: [{ phone: sanitized.phone }, { email: sanitized.email }],
     });
 
     if (existing) {
-      // Update existing lead
       existing.name = sanitized.name;
       existing.investmentGoal = sanitized.investmentGoal;
+      if (riskProfile) existing.riskProfile = riskProfile;
+      if (productInterest) existing.productInterest = productInterest;
+      if (investmentHorizon) existing.investmentHorizon = investmentHorizon;
       if (finalPriority === 'high') {
         existing.priority = finalPriority;
         existing.priorityReason = finalReason;
       }
+      existing.lastActive = new Date();
+      existing.totalConversations = (existing.totalConversations || 1) + 1;
+      existing.engagementScore = calculateEngagementScore({
+        totalMessages: existing.totalConversations * 3,
+        priority: existing.priority,
+      });
       await existing.save();
 
-      // Update user session
       if (sessionId) {
-        await User.findOneAndUpdate(
-          { sessionId },
-          { name: sanitized.name, phone: sanitized.phone, email: sanitized.email, investmentGoal: sanitized.investmentGoal, leadCaptured: true }
-        );
+        await User.findOneAndUpdate({ sessionId }, {
+          name: sanitized.name, phone: sanitized.phone,
+          email: sanitized.email, investmentGoal: sanitized.investmentGoal, leadCaptured: true,
+        });
       }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Lead updated successfully.',
-        data: { leadId: existing._id },
-      });
+      return res.status(200).json({ success: true, message: 'Lead updated.', data: { leadId: existing._id } });
     }
 
-    // Create new lead
+    const engagementScore = calculateEngagementScore({ totalMessages: 3, priority: finalPriority });
+
     const lead = await Lead.create({
       sessionId,
       name: sanitized.name,
       phone: sanitized.phone,
       email: sanitized.email,
       investmentGoal: sanitized.investmentGoal,
+      riskProfile: riskProfile || 'not_specified',
+      productInterest: productInterest || [],
+      investmentHorizon: investmentHorizon || 'not_specified',
       priority: finalPriority,
       priorityReason: finalReason,
+      engagementScore,
     });
 
-    // Update user session
     if (sessionId) {
-      await User.findOneAndUpdate(
-        { sessionId },
-        { name: sanitized.name, phone: sanitized.phone, email: sanitized.email, investmentGoal: sanitized.investmentGoal, leadCaptured: true }
-      );
+      await User.findOneAndUpdate({ sessionId }, {
+        name: sanitized.name, phone: sanitized.phone,
+        email: sanitized.email, investmentGoal: sanitized.investmentGoal, leadCaptured: true,
+      });
     }
 
-    logger.info(`New lead captured: ${lead._id} | Priority: ${finalPriority}`);
-
-    return res.status(201).json({
-      success: true,
-      message: 'Lead captured successfully.',
-      data: { leadId: lead._id },
-    });
+    logger.info(`Lead captured: ${lead._id} | Priority: ${finalPriority}`);
+    return res.status(201).json({ success: true, message: 'Lead captured.', data: { leadId: lead._id } });
   } catch (error) {
     logger.error(`Lead creation error: ${error.message}`);
     return res.status(500).json({ success: false, message: 'Failed to capture lead.' });
@@ -114,16 +106,15 @@ const createLead = async (req, res) => {
 };
 
 /**
- * GET /api/leads  (Admin protected)
- * Get all leads with filters
+ * GET /api/leads (Admin)
  */
 const getLeads = async (req, res) => {
   try {
-    const { priority, status, page = 1, limit = 20, search } = req.query;
-
+    const { priority, status, followUpStatus, page = 1, limit = 20, search } = req.query;
     const filter = {};
     if (priority) filter.priority = priority;
     if (status) filter.status = status;
+    if (followUpStatus) filter.followUpStatus = followUpStatus;
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -133,23 +124,14 @@ const getLeads = async (req, res) => {
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
     const [leads, total] = await Promise.all([
-      Lead.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).lean(),
+      Lead.find(filter).sort({ priority: -1, createdAt: -1 }).skip(skip).limit(parseInt(limit)).lean(),
       Lead.countDocuments(filter),
     ]);
 
     return res.status(200).json({
       success: true,
-      data: {
-        leads,
-        pagination: {
-          total,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          pages: Math.ceil(total / parseInt(limit)),
-        },
-      },
+      data: { leads, pagination: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / parseInt(limit)) } },
     });
   } catch (error) {
     logger.error(`Get leads error: ${error.message}`);
@@ -158,21 +140,22 @@ const getLeads = async (req, res) => {
 };
 
 /**
- * PATCH /api/leads/:id  (Admin protected)
- * Update lead status
+ * PATCH /api/leads/:id (Admin)
  */
 const updateLead = async (req, res) => {
   try {
-    const { status, notes, assignedAdvisor } = req.body;
-    const lead = await Lead.findByIdAndUpdate(
-      req.params.id,
-      { ...(status && { status }), ...(notes && { notes }), ...(assignedAdvisor && { assignedAdvisor }) },
-      { new: true, runValidators: true }
-    );
+    const { status, notes, followUpStatus, followUpDate, followUpNotes, riskProfile, investmentHorizon } = req.body;
+    const update = {};
+    if (status) update.status = status;
+    if (notes !== undefined) update.notes = notes;
+    if (followUpStatus) update.followUpStatus = followUpStatus;
+    if (followUpDate) update.followUpDate = new Date(followUpDate);
+    if (followUpNotes) update.followUpNotes = followUpNotes;
+    if (riskProfile) update.riskProfile = riskProfile;
+    if (investmentHorizon) update.investmentHorizon = investmentHorizon;
 
-    if (!lead) {
-      return res.status(404).json({ success: false, message: 'Lead not found.' });
-    }
+    const lead = await Lead.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
+    if (!lead) return res.status(404).json({ success: false, message: 'Lead not found.' });
 
     return res.status(200).json({ success: true, data: lead });
   } catch (error) {

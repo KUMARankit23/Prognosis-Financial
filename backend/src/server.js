@@ -11,6 +11,7 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 const chatRoutes = require('./routes/chatRoutes');
 const leadRoutes = require('./routes/leadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const followUpRoutes = require('./routes/followUpRoutes');
 
 // Initialize
 const app = express();
@@ -67,6 +68,7 @@ app.get('/health', (req, res) => {
 app.use('/api/chat', chatRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/followups', followUpRoutes);
 
 // 404 handler
 app.use(notFound);

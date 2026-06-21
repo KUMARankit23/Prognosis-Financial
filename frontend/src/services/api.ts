@@ -8,14 +8,11 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach session ID to every request
 api.interceptors.request.use((config) => {
   const sessionId = localStorage.getItem('pf_session_id');
   if (sessionId) config.headers['x-session-id'] = sessionId;
-
   const adminToken = localStorage.getItem('pf_admin_token');
   if (adminToken) config.headers['Authorization'] = `Bearer ${adminToken}`;
-
   return config;
 });
 
@@ -43,17 +40,22 @@ export const chatAPI = {
 // Lead API
 export const leadAPI = {
   create: (data: {
-    sessionId: string;
-    name: string;
-    phone: string;
-    email: string;
-    investmentGoal: string;
-    context?: string;
+    sessionId: string; name: string; phone: string; email: string;
+    investmentGoal: string; riskProfile?: string; productInterest?: string[];
+    investmentHorizon?: string; context?: string;
   }) => api.post('/leads', data),
-  getAll: (params?: { priority?: string; status?: string; page?: number; search?: string }) =>
+  getAll: (params?: { priority?: string; status?: string; followUpStatus?: string; page?: number; search?: string }) =>
     api.get('/leads', { params }),
-  update: (id: string, data: { status?: string; notes?: string }) =>
-    api.patch(`/leads/${id}`, data),
+  update: (id: string, data: object) => api.patch(`/leads/${id}`, data),
+};
+
+// Follow-up API
+export const followUpAPI = {
+  create: (data: { sessionId?: string; leadId?: string; reason?: string; channel?: string; scheduledAt?: string }) =>
+    api.post('/followups', data),
+  getAll: (params?: { status?: string; page?: number }) =>
+    api.get('/followups', { params }),
+  update: (id: string, data: object) => api.patch(`/followups/${id}`, data),
 };
 
 // Admin API
@@ -64,7 +66,7 @@ export const adminAPI = {
   getUsers: (params?: { page?: number }) => api.get('/admin/users', { params }),
   getTickets: (params?: { status?: string; priority?: string; page?: number }) =>
     api.get('/admin/advisor-tickets', { params }),
-  updateTicket: (id: string, data: { status?: string; assignedAdvisor?: string; notes?: string }) =>
+  updateTicket: (id: string, data: object) =>
     api.patch(`/admin/advisor-tickets/${id}`, data),
 };
 

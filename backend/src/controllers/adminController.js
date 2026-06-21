@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Message = require('../models/Message');
 const Lead = require('../models/Lead');
 const AdvisorTicket = require('../models/AdvisorTicket');
+const FollowUp = require('../models/FollowUp');
 const logger = require('../utils/logger');
 
 /**
@@ -46,19 +47,14 @@ const login = async (req, res) => {
 
 /**
  * GET /api/admin/stats
- * Dashboard statistics
+ * Dashboard statistics — CIP Enhanced
  */
 const getStats = async (req, res) => {
   try {
     const [
-      totalUsers,
-      totalMessages,
-      totalLeads,
-      openTickets,
-      highPriorityLeads,
-      todayLeads,
-      intentDistribution,
-      leadsByPriority,
+      totalUsers, totalMessages, totalLeads, openTickets,
+      highPriorityLeads, todayLeads, intentDistribution, leadsByPriority,
+      pendingFollowUps, totalFollowUps, leadsByGoal,
     ] = await Promise.all([
       User.countDocuments(),
       Message.countDocuments({ role: 'user' }),
@@ -66,27 +62,19 @@ const getStats = async (req, res) => {
       AdvisorTicket.countDocuments({ status: 'open' }),
       Lead.countDocuments({ priority: 'high' }),
       Lead.countDocuments({ createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } }),
-      Message.aggregate([
-        { $match: { role: 'user' } },
-        { $group: { _id: '$intent', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]),
-      Lead.aggregate([
-        { $group: { _id: '$priority', count: { $sum: 1 } } },
-      ]),
+      Message.aggregate([{ $match: { role: 'user' } }, { $group: { _id: '$intent', count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
+      Lead.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }]),
+      FollowUp.countDocuments({ status: { $in: ['pending', 'scheduled'] } }),
+      FollowUp.countDocuments(),
+      Lead.aggregate([{ $group: { _id: '$investmentGoal', count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
     ]);
 
     return res.status(200).json({
       success: true,
       data: {
-        totalUsers,
-        totalMessages,
-        totalLeads,
-        openTickets,
-        highPriorityLeads,
-        todayLeads,
-        intentDistribution,
-        leadsByPriority,
+        totalUsers, totalMessages, totalLeads, openTickets,
+        highPriorityLeads, todayLeads, intentDistribution, leadsByPriority,
+        pendingFollowUps, totalFollowUps, leadsByGoal,
       },
     });
   } catch (error) {

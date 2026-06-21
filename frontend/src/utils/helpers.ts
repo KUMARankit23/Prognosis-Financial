@@ -20,23 +20,15 @@ export const formatDate = (date: Date | string): string => {
 };
 
 export const sanitizeInput = (input: string): string => {
-  return input
-    .replace(/[<>]/g, '')
-    .replace(/javascript:/gi, '')
-    .trim()
-    .substring(0, 2000);
+  return input.replace(/[<>]/g, '').replace(/javascript:/gi, '').trim().substring(0, 2000);
 };
 
 export const getIntentLabel = (intent: string): string => {
   const labels: Record<string, string> = {
-    sip_query: 'SIP',
-    mutual_fund_query: 'Mutual Fund',
-    demat_query: 'Demat',
-    insurance_query: 'Insurance',
-    goal_planning_query: 'Goal Planning',
-    wealth_creation_query: 'Wealth Creation',
-    general_query: 'General',
-    advisor_escalation: 'Advisor Escalation',
+    sip_query: 'SIP', mutual_fund_query: 'Mutual Fund', demat_query: 'Demat',
+    insurance_query: 'Insurance', goal_planning_query: 'Goal Planning',
+    wealth_creation_query: 'Wealth Creation', general_query: 'General',
+    advisor_escalation: 'Advisor Escalation', follow_up_query: 'Follow-Up',
     greeting: 'Greeting',
   };
   return labels[intent] || intent;
@@ -44,15 +36,39 @@ export const getIntentLabel = (intent: string): string => {
 
 export const getInvestmentGoalLabel = (goal: string): string => {
   const labels: Record<string, string> = {
-    wealth_creation: 'Wealth Creation',
-    retirement: 'Retirement Planning',
-    education: 'Education Fund',
-    home: 'Home Purchase',
-    emergency_fund: 'Emergency Fund',
-    tax_saving: 'Tax Saving',
-    other: 'Other',
+    wealth_creation: 'Wealth Creation', retirement: 'Retirement Planning',
+    education: 'Child Education', home: 'Home Purchase',
+    emergency_fund: 'Emergency Fund', tax_saving: 'Tax Saving', other: 'Other',
   };
   return labels[goal] || goal;
+};
+
+export const getRiskProfileLabel = (risk: string): string => {
+  const labels: Record<string, string> = {
+    conservative: 'Conservative', moderate: 'Moderate',
+    aggressive: 'Aggressive', not_specified: 'Not Specified',
+  };
+  return labels[risk] || risk;
+};
+
+export const getInvestmentHorizonLabel = (horizon: string): string => {
+  const labels: Record<string, string> = {
+    short_term: 'Short Term (< 3 yrs)', medium_term: 'Medium Term (3-7 yrs)',
+    long_term: 'Long Term (7+ yrs)', not_specified: 'Not Specified',
+  };
+  return labels[horizon] || horizon;
+};
+
+export const getFollowUpStatusColor = (status: string): string => {
+  const colors: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    scheduled: 'bg-blue-100 text-blue-700',
+    completed: 'bg-green-100 text-green-700',
+    escalated: 'bg-red-100 text-red-700',
+    cancelled: 'bg-gray-100 text-gray-500',
+    none: 'bg-gray-100 text-gray-400',
+  };
+  return colors[status] || colors.none;
 };
 
 export const truncate = (str: string, max: number): string => {
