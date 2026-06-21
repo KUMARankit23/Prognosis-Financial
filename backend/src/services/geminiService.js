@@ -65,7 +65,7 @@ async function generateResponse(userMessage, conversationHistory = [], intent, e
       : cleanMessage;
 
     const response = await ai.models.generateContent({
-      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite-preview-06-17',
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
       contents: fullPrompt,
       config: {
         systemInstruction: SYSTEM_PROMPT,

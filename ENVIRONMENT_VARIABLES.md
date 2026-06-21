@@ -8,7 +8,7 @@
 | `NODE_ENV` | Yes | Environment | `development` or `production` |
 | `MONGODB_URI` | Yes | MongoDB Atlas connection string | `mongodb+srv://user:pass@cluster.net/db` |
 | `GEMINI_API_KEY` | Yes | Google Gemini API key | Get free key at aistudio.google.com |
-| `GEMINI_MODEL` | No | Gemini model to use | `gemini-2.5-flash-lite-preview-06-17` (default) |
+| `GEMINI_MODEL` | No | Gemini model to use | `gemini-2.5-flash-lite` (default) |
 | `JWT_SECRET` | Yes | Secret for JWT signing | Long random string |
 | `JWT_EXPIRES_IN` | No | Token expiry | `7d` |
 | `ADMIN_EMAIL` | Yes | Admin account email | `admin@prognosisfinancial.com` |

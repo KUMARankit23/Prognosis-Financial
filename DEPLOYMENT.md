@@ -50,7 +50,7 @@ git push -u origin main
 NODE_ENV=production
 MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/prognosis_financial
 GEMINI_API_KEY=your-gemini-api-key-from-aistudio-google-com
-GEMINI_MODEL=gemini-2.5-flash-lite-preview-06-17
+GEMINI_MODEL=gemini-2.5-flash-lite
 JWT_SECRET=your-long-random-secret-string
 JWT_EXPIRES_IN=7d
 ADMIN_EMAIL=admin@prognosisfinancial.com
