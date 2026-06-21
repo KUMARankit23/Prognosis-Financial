@@ -11,6 +11,10 @@ render.env
 dist/
 build/
 
+# Large files
+*.zip
+*.tar.gz
+
 # Logs
 logs/
 *.log
